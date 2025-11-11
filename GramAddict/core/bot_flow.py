@@ -209,14 +209,33 @@ def start_bot(**kwargs):
             or session_state.my_followers_count is None
             or session_state.my_following_count is None
         ):
-            logger.critical(
-                "Could not get one of the following from your profile: username, # of posts, # of followers, # of followings. This is typically due to a soft-ban. Review the crash screenshot to see if this is the case."
+            logger.warning(
+                "Could not get complete profile info. Some values are missing."
             )
-            logger.critical(
+            logger.warning(
                 f"Username: {session_state.my_username}, Posts: {session_state.my_posts_count}, Followers: {session_state.my_followers_count}, Following: {session_state.my_following_count}"
             )
-            save_crash(device)
-            stop_bot(device, sessions, session_state)
+
+            # Set default values for Instagram v406 compatibility
+            if session_state.my_posts_count is None:
+                session_state.my_posts_count = 0
+                logger.warning("Posts count unknown - set to 0. Bot will continue anyway.")
+
+            if session_state.my_followers_count is None:
+                session_state.my_followers_count = 0
+                logger.warning("Followers count unknown - set to 0. This won't affect basic features like liking feed.")
+
+            if session_state.my_following_count is None:
+                session_state.my_following_count = 0
+                logger.warning("Following count unknown - set to 0. Bot will continue anyway.")
+
+            # Only stop if username is missing (critical issue)
+            if session_state.my_username is None:
+                logger.critical("Cannot get username - this is a critical error. Stopping bot.")
+                save_crash(device)
+                stop_bot(device, sessions, session_state)
+            else:
+                logger.info("Bot will continue with available information. Instagram v406 may hide some profile stats.")
 
         if not is_log_file_updated():
             try:
