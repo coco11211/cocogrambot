@@ -528,6 +528,7 @@ class PostsViewList:
                 else:
                     logger.debug("Gap view not found (Instagram v406), using screen-based scroll")
                     # Fallback: use screen height for swipe calculation
+                    displayHeight = self.device.get_info()["displayHeight"]
                     obj1 = displayHeight * 0.75
 
             containers_content = self.device.find(resourceIdMatches=containers_content)
@@ -709,6 +710,12 @@ class PostsViewList:
             current_job, Owner.GET_NAME
         )
         has_tags = self._has_tags()
+
+        # INSTAGRAM V406: Skip sponsored posts quickly without wasting time
+        if is_ad:
+            logger.info(f"Sponsored post detected - skipping quickly")
+            return False, "", username, is_ad, is_hashtag, has_tags
+
         while True:
             post_description = self.device.find(
                 index=-1,
