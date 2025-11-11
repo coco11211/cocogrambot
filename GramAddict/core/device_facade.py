@@ -340,11 +340,11 @@ class DeviceFacade:
     def sleep_mode(mode):
         mode = SleepTime.DEFAULT if mode is None else mode
         if mode == SleepTime.DEFAULT:
-            random_sleep()
+            random_sleep(0.1, 0.4, modulable=False)
         elif mode == SleepTime.TINY:
-            random_sleep(0, 1)
+            random_sleep(0.1, 0.4, modulable=False)
         elif mode == SleepTime.SHORT:
-            random_sleep(1, 2)
+            random_sleep(0.1, 0.4, modulable=False)
         elif mode == SleepTime.ZERO:
             pass
 
@@ -512,7 +512,7 @@ class DeviceFacade:
 
             while maxretry > 0:
                 # we wait a little more before try again
-                random_sleep(2, 4, modulable=False)
+                random_sleep(0.1, 0.4, modulable=False)
                 if not self.exists():
                     return True
                 logger.debug("UI element didn't open! Try again..")
@@ -711,7 +711,7 @@ class DeviceFacade:
                 else:
                     self.click(sleep=SleepTime.SHORT)
                     self.deviceV2.clear_text()
-                    random_sleep(0.3, 1, modulable=False)
+                    random_sleep(0.1, 0.4, modulable=False)
                     start = datetime.now()
                     sentences = text.splitlines()
                     for j, sentence in enumerate(sentences, start=1):

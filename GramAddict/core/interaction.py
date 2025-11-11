@@ -944,7 +944,7 @@ def _watch_stories(
             nonlocal stories_counter
             stories_counter += 1
             for _ in range(7):
-                random_sleep(0.5, 1, modulable=False, log=False)
+                random_sleep(0.1, 0.4, modulable=False, log=False)
                 if story_view.getUsername().strip().casefold() != username.casefold():
                     return False
             like_story()

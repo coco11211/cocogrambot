@@ -458,8 +458,8 @@ def _restore_keyboard(device):
     device.deviceV2.set_fastinput_ime(False)
 
 
-def random_sleep(inf=0.5, sup=3.0, modulable=True, log=True):
-    MIN_INF = 0.3
+def random_sleep(inf=0.1, sup=0.4, modulable=True, log=True):
+    MIN_INF = 0.1
     multiplier = float(args.speed_multiplier)
     delay = uniform(inf, sup) / (multiplier if modulable else 1.0)
     delay = max(delay, MIN_INF)

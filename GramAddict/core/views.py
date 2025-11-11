@@ -648,7 +648,7 @@ class PostsViewList:
             logger.debug("Facepile present, pressing on it!")
             facepil_stub.click()
         else:
-            random_sleep(1, 2, modulable=False)
+            random_sleep(0.1, 0.4, modulable=False)
             likes_view = self.device.find(
                 index=-1,
                 resourceId=ResourceID.ROW_FEED_TEXTVIEW_LIKES,
@@ -727,67 +727,7 @@ class PostsViewList:
             logger.info(f"Sponsored post detected - skipping quickly")
             return False, "", username, is_ad, is_hashtag, has_tags
 
-        # SPEED FIX: Limit description search attempts to 2 max
-        max_swipe_attempts = 2
-        swipe_attempts = 0
-
-        while swipe_attempts < max_swipe_attempts:
-            post_description = self.device.find(
-                index=-1,
-                resourceIdMatches=ResourceID.ROW_FEED_TEXT,
-                textStartsWith=username,
-            )
-            if not post_description.exists() and post_description.count_items() >= 1:
-                text = post_description.get_text()
-                post_description = self.device.find(
-                    index=-1,
-                    resourceIdMatches=ResourceID.ROW_FEED_TEXT,
-                    text=text,
-                )
-            if post_description.exists():
-                logger.debug("Description found!")
-                new_description = post_description.get_text().upper()
-                if new_description != last_description:
-                    return False, new_description, username, is_ad, is_hashtag, has_tags
-                logger.info(
-                    "This post has the same description and author as the last one."
-                )
-                return True, new_description, username, is_ad, is_hashtag, has_tags
-            else:
-                gap_view_obj = self.device.find(resourceId=ResourceID.GAP_VIEW)
-                feed_composer = self.device.find(
-                    resourceId=ResourceID.FEED_INLINE_COMPOSER_BUTTON_TEXTVIEW
-                )
-                if gap_view_obj.exists() and gap_view_obj.get_bounds()["bottom"] < (
-                    self.device.get_info()["displayHeight"] / 3
-                ):
-                    universal_actions._swipe_points(
-                        direction=Direction.DOWN, delta_y=200
-                    )
-                    swipe_attempts += 1
-                    continue
-                row_feed_profile_header = self.device.find(
-                    resourceId=ResourceID.ROW_FEED_PROFILE_HEADER
-                )
-                if row_feed_profile_header.count_items() > 1:
-                    logger.info("This post hasn't the description...")
-                    return False, "", username, is_ad, is_hashtag, has_tags
-                profile_header_is_above = row_feed_profile_header.is_above_this(
-                    gap_view_obj if gap_view_obj.exists() else feed_composer
-                )
-                if profile_header_is_above is not None:
-                    if not profile_header_is_above:
-                        logger.info("This post hasn't the description...")
-                        return False, "", username, is_ad, is_hashtag, has_tags
-
-                logger.debug(
-                    f"Can't find the description of {username}'s post, try to swipe a little bit down."
-                )
-                universal_actions._swipe_points(direction=Direction.DOWN, delta_y=200)
-                swipe_attempts += 1
-
-        # SPEED FIX: Give up after max attempts and move on
-        logger.info(f"Couldn't find description after {max_swipe_attempts} attempts - moving on")
+        # SPEED OPTIMIZATION: Skip description search entirely - just move to next post
         return False, "", username, is_ad, is_hashtag, has_tags
 
     def _if_action_bar_is_over_obj_swipe(self, obj):
@@ -820,7 +760,7 @@ class PostsViewList:
         refresh_pill = self.device.find(resourceId=ResourceID.NEW_FEED_PILL)
         if refresh_pill.exists(Timeout.SHORT):
             refresh_pill.click()
-            random_sleep(inf=5, sup=8, modulable=False)
+            random_sleep(inf=0.1, sup=0.4, modulable=False)
         else:
             UniversalActions(self.device)._reload_page()
 
@@ -2159,7 +2099,7 @@ class FollowingView:
                 resourceId=ResourceID.PRIMARY_BUTTON, textMatches=UNFOLLOW_REGEX
             )
             if confirm_unfollow_button.exists(Timeout.SHORT):
-                random_sleep(1, 2)
+                random_sleep(0.1, 0.4, modulable=False)
                 confirm_unfollow_button.click()
             UniversalActions.detect_block(self.device)
             FOLLOW_REGEX = "^Follow$"
@@ -2318,7 +2258,7 @@ class UniversalActions:
     def _reload_page(self) -> None:
         logger.debug("Reload page.")
         self._swipe_points(direction=Direction.UP)
-        random_sleep(inf=5, sup=8, modulable=False)
+        random_sleep(inf=0.1, sup=0.4, modulable=False)
 
     @staticmethod
     def detect_block(device) -> bool:
