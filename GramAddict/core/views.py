@@ -716,7 +716,11 @@ class PostsViewList:
             logger.info(f"Sponsored post detected - skipping quickly")
             return False, "", username, is_ad, is_hashtag, has_tags
 
-        while True:
+        # SPEED FIX: Limit description search attempts to 2 max
+        max_swipe_attempts = 2
+        swipe_attempts = 0
+
+        while swipe_attempts < max_swipe_attempts:
             post_description = self.device.find(
                 index=-1,
                 resourceIdMatches=ResourceID.ROW_FEED_TEXT,
@@ -749,6 +753,7 @@ class PostsViewList:
                     universal_actions._swipe_points(
                         direction=Direction.DOWN, delta_y=200
                     )
+                    swipe_attempts += 1
                     continue
                 row_feed_profile_header = self.device.find(
                     resourceId=ResourceID.ROW_FEED_PROFILE_HEADER
@@ -768,6 +773,11 @@ class PostsViewList:
                     f"Can't find the description of {username}'s post, try to swipe a little bit down."
                 )
                 universal_actions._swipe_points(direction=Direction.DOWN, delta_y=200)
+                swipe_attempts += 1
+
+        # SPEED FIX: Give up after max attempts and move on
+        logger.info(f"Couldn't find description after {max_swipe_attempts} attempts - moving on")
+        return False, "", username, is_ad, is_hashtag, has_tags
 
     def _if_action_bar_is_over_obj_swipe(self, obj):
         """do a swipe of the amount of the action bar"""
