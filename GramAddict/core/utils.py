@@ -147,14 +147,34 @@ def config_examples():
 
 
 def check_adb_connection():
+    """Check ADB connection status.
+
+    Returns:
+        bool: True if device(s) available, False otherwise
+    """
     is_device_id_provided = configs.device_id is not None
+
     # sometimes it needs two requests to wake up...
     stream = os.popen("adb devices")
     stream.close()
+    sleep(0.5)  # Small delay to ensure adb server is ready
     stream = os.popen("adb devices")
     output = stream.read()
-    devices_count = len(re.findall("device\n", output))
     stream.close()
+
+    # Count both USB and network devices (pattern: "device\n" or "device  \n")
+    devices_count = len(re.findall(r"device\s*\n", output))
+
+    # Also check if specific device_id is present if provided
+    device_present = True
+    if is_device_id_provided and configs.device_id:
+        # Check if the specified device appears in the output
+        device_present = configs.device_id in output
+        if not device_present:
+            logger.warning(
+                f"Specified device '{configs.device_id}' not found in ADB devices list. "
+                f"Output: {output}"
+            )
 
     is_ok = True
     message = "That's ok."
@@ -164,6 +184,9 @@ def check_adb_connection():
     elif devices_count > 1 and not is_device_id_provided:
         is_ok = False
         message = "Set a device name in your config.yml"
+    elif is_device_id_provided and not device_present:
+        is_ok = False
+        message = f"Specified device '{configs.device_id}' not found."
 
     if is_ok:
         logger.debug(f"Connected devices via adb: {devices_count}. {message}")

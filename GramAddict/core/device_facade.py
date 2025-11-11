@@ -17,12 +17,44 @@ from GramAddict.core.utils import random_sleep
 logger = logging.getLogger(__name__)
 
 
-def create_device(device_id, app_id):
-    try:
-        return DeviceFacade(device_id, app_id)
-    except ImportError as e:
-        logger.error(str(e))
-        return None
+def create_device(device_id, app_id, max_retries=3):
+    """Create device connection with retry logic.
+
+    Args:
+        device_id: Device identifier (serial or IP)
+        app_id: App package ID
+        max_retries: Maximum number of connection attempts
+
+    Returns:
+        DeviceFacade instance or None if connection fails
+    """
+    import time
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"Attempting to connect to device (attempt {attempt}/{max_retries})...")
+            return DeviceFacade(device_id, app_id)
+        except ImportError as e:
+            logger.error(str(e))
+            return None
+        except RuntimeError as e:
+            if attempt < max_retries:
+                wait_time = attempt * 2  # Exponential backoff: 2s, 4s, 6s
+                logger.warning(
+                    f"Failed to connect to device: {str(e)}. "
+                    f"Retrying in {wait_time} seconds... ({attempt}/{max_retries})"
+                )
+                time.sleep(wait_time)
+            else:
+                logger.error(
+                    f"Failed to connect to device after {max_retries} attempts: {str(e)}"
+                )
+                return None
+        except Exception as e:
+            logger.error(f"Unexpected error connecting to device: {str(e)}")
+            return None
+
+    return None
 
 
 def get_device_info(device):
@@ -93,6 +125,9 @@ class DeviceFacade:
                 self.deviceV2 = uiautomator2.connect_adb_wifi(f"{device_id}")
         except ImportError:
             raise ImportError("Please install uiautomator2: pip3 install uiautomator2")
+        except RuntimeError as e:
+            # Raised by uiautomator2 when device is not found
+            raise RuntimeError(f"Failed to connect to device: {str(e)}")
 
     def _get_current_app(self):
         try:

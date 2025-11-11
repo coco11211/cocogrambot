@@ -100,6 +100,12 @@ def start_bot(**kwargs):
         )
         return
     device = create_device(configs.device_id, configs.app_id)
+    if device is None:
+        logger.error(
+            "Failed to create device connection. Please check that your device is "
+            "properly connected via ADB and try again."
+        )
+        return
     session_state = None
     if str(configs.args.total_sessions) != "-1":
         total_sessions = get_value(configs.args.total_sessions, None, -1)
