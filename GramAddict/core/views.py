@@ -1654,15 +1654,82 @@ class ProfileView(ActionBarView):
 
     def getFollowersCount(self) -> Optional[int]:
         followers = None
+
+        # Method 1: Try original resource ID
         followers_text_view = self._getFollowersTextView()
         if followers_text_view.exists():
             followers_text = followers_text_view.get_text()
             if followers_text:
                 followers = self._parseCounter(followers_text)
-            else:
-                logger.error("Cannot get followers count text.")
-        else:
-            logger.error("Cannot find followers count view.")
+                logger.debug(f"Found followers via resource ID: {followers}")
+                return followers
+
+        # Method 2: Try finding via followers container and extract number
+        logger.debug("Method 1 failed, trying followers container approach...")
+        followers_container = self.device.find(
+            resourceIdMatches=case_insensitive_re(
+                ResourceID.ROW_PROFILE_HEADER_FOLLOWERS_CONTAINER
+            )
+        )
+        if followers_container.exists(Timeout.MEDIUM):
+            # Try to find TextView children with numbers
+            for child in followers_container.iterate_children():
+                text = child.get_text()
+                if text and text.replace(',', '').replace('.', '').replace('K', '').replace('M', '').replace('k', '').replace('m', '').replace(' ', '').isdigit():
+                    followers = self._parseCounter(text)
+                    logger.info(f"Found followers via container method: {followers}")
+                    return followers
+
+        # Method 3: Try finding any TextView with "followers" text nearby
+        logger.debug("Method 2 failed, trying text pattern search...")
+        try:
+            all_text_views = self.device.find(className=ClassName.TEXT_VIEW)
+            for i in range(10):  # Check first 10 text views on profile
+                view = all_text_views.child(index=i)
+                if view.exists():
+                    text = view.get_text()
+                    if text:
+                        # Look for pattern like "123", "1.2K", "1.2M" near "followers"
+                        import re
+                        number_pattern = re.compile(r'^[\d,\.KkMm]+$')
+                        if number_pattern.match(text.strip()):
+                            # Check if next sibling or nearby text contains "followers"
+                            potential_count = self._parseCounter(text)
+                            if potential_count is not None and potential_count >= 0:
+                                logger.info(f"Found potential followers count via pattern: {potential_count}")
+                                followers = potential_count
+                                # Verify by checking if "followers" text exists nearby
+                                parent = view.get_parent()
+                                if parent:
+                                    parent_text = str(parent)
+                                    if 'follower' in parent_text.lower():
+                                        logger.info(f"Verified followers count: {followers}")
+                                        return followers
+        except Exception as e:
+            logger.debug(f"Method 3 exception: {e}")
+
+        # Method 4: Last resort - try to find by text containing "followers"
+        logger.debug("Method 3 failed, trying followers text search...")
+        try:
+            followers_text_view = self.device.find(
+                textMatches=case_insensitive_re(r'.*follower.*'),
+                className=ClassName.TEXT_VIEW
+            )
+            if followers_text_view.exists(Timeout.SHORT):
+                text = followers_text_view.get_text()
+                if text:
+                    # Try to extract number from text like "123 followers"
+                    import re
+                    match = re.search(r'([\d,\.KkMm]+)', text)
+                    if match:
+                        followers = self._parseCounter(match.group(1))
+                        logger.info(f"Found followers via text search: {followers}")
+                        return followers
+        except Exception as e:
+            logger.debug(f"Method 4 exception: {e}")
+
+        if followers is None:
+            logger.error("Cannot find followers count view after trying all methods.")
 
         return followers
 
@@ -1678,19 +1745,87 @@ class ProfileView(ActionBarView):
 
     def getFollowingCount(self) -> Optional[int]:
         following = None
+
+        # Method 1: Try original resource ID
         following_text_view = self._getFollowingTextView()
         if following_text_view.exists(Timeout.MEDIUM):
             following_text = following_text_view.get_text()
             if following_text:
                 following = self._parseCounter(following_text)
-            else:
-                logger.error("Cannot get following count text.")
-        else:
-            logger.error("Cannot find following count view.")
+                logger.debug(f"Found following via resource ID: {following}")
+                return following
+
+        # Method 2: Try finding via following container and extract number
+        logger.debug("Method 1 failed, trying following container approach...")
+        following_container = self.device.find(
+            resourceIdMatches=case_insensitive_re(
+                ResourceID.ROW_PROFILE_HEADER_FOLLOWING_CONTAINER
+            )
+        )
+        if following_container.exists(Timeout.MEDIUM):
+            # Try to find TextView children with numbers
+            for child in following_container.iterate_children():
+                text = child.get_text()
+                if text and text.replace(',', '').replace('.', '').replace('K', '').replace('M', '').replace('k', '').replace('m', '').replace(' ', '').isdigit():
+                    following = self._parseCounter(text)
+                    logger.info(f"Found following via container method: {following}")
+                    return following
+
+        # Method 3: Try finding any TextView with "following" text nearby
+        logger.debug("Method 2 failed, trying text pattern search...")
+        try:
+            all_text_views = self.device.find(className=ClassName.TEXT_VIEW)
+            for i in range(10):  # Check first 10 text views on profile
+                view = all_text_views.child(index=i)
+                if view.exists():
+                    text = view.get_text()
+                    if text:
+                        # Look for pattern like "123", "1.2K", "1.2M" near "following"
+                        import re
+                        number_pattern = re.compile(r'^[\d,\.KkMm]+$')
+                        if number_pattern.match(text.strip()):
+                            # Check if next sibling or nearby text contains "following"
+                            potential_count = self._parseCounter(text)
+                            if potential_count is not None and potential_count >= 0:
+                                logger.info(f"Found potential following count via pattern: {potential_count}")
+                                following = potential_count
+                                # Verify by checking if "following" text exists nearby
+                                parent = view.get_parent()
+                                if parent:
+                                    parent_text = str(parent)
+                                    if 'following' in parent_text.lower():
+                                        logger.info(f"Verified following count: {following}")
+                                        return following
+        except Exception as e:
+            logger.debug(f"Method 3 exception: {e}")
+
+        # Method 4: Last resort - try to find by text containing "following"
+        logger.debug("Method 3 failed, trying following text search...")
+        try:
+            following_text_view = self.device.find(
+                textMatches=case_insensitive_re(r'.*following.*'),
+                className=ClassName.TEXT_VIEW
+            )
+            if following_text_view.exists(Timeout.SHORT):
+                text = following_text_view.get_text()
+                if text:
+                    # Try to extract number from text like "123 following"
+                    import re
+                    match = re.search(r'([\d,\.KkMm]+)', text)
+                    if match:
+                        following = self._parseCounter(match.group(1))
+                        logger.info(f"Found following via text search: {following}")
+                        return following
+        except Exception as e:
+            logger.debug(f"Method 4 exception: {e}")
+
+        if following is None:
+            logger.error("Cannot find following count view after trying all methods.")
 
         return following
 
     def getPostsCount(self) -> int:
+        # Method 1: Try original resource ID
         post_count_view = self.device.find(
             resourceIdMatches=case_insensitive_re(
                 ResourceID.ROW_PROFILE_HEADER_TEXTVIEW_POST_COUNT
@@ -1699,8 +1834,45 @@ class ProfileView(ActionBarView):
         if post_count_view.exists(Timeout.MEDIUM):
             count = post_count_view.get_text()
             if count is not None:
-                return self._parseCounter(count)
-        logger.error("Cannot get posts count text.")
+                result = self._parseCounter(count)
+                logger.debug(f"Found posts count via resource ID: {result}")
+                return result
+
+        # Method 2: Try finding via post container
+        logger.debug("Method 1 failed, trying post container approach...")
+        post_container = self.device.find(
+            resourceIdMatches=case_insensitive_re(
+                ResourceID.ROW_PROFILE_HEADER_TEXTVIEW_POST_CONTAINER
+            )
+        )
+        if post_container.exists(Timeout.MEDIUM):
+            for child in post_container.iterate_children():
+                text = child.get_text()
+                if text and text.replace(',', '').replace('.', '').replace('K', '').replace('M', '').replace('k', '').replace('m', '').replace(' ', '').isdigit():
+                    result = self._parseCounter(text)
+                    logger.info(f"Found posts count via container method: {result}")
+                    return result
+
+        # Method 3: Try finding by "posts" text
+        logger.debug("Method 2 failed, trying posts text search...")
+        try:
+            posts_text_view = self.device.find(
+                textMatches=case_insensitive_re(r'.*posts.*'),
+                className=ClassName.TEXT_VIEW
+            )
+            if posts_text_view.exists(Timeout.SHORT):
+                text = posts_text_view.get_text()
+                if text:
+                    import re
+                    match = re.search(r'([\d,\.KkMm]+)', text)
+                    if match:
+                        result = self._parseCounter(match.group(1))
+                        logger.info(f"Found posts count via text search: {result}")
+                        return result
+        except Exception as e:
+            logger.debug(f"Method 3 exception: {e}")
+
+        logger.error("Cannot get posts count text after trying all methods.")
         return 0
 
     def count_photo_in_view(self) -> Tuple[int, int]:
