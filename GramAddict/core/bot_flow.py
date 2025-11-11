@@ -192,14 +192,26 @@ def start_bot(**kwargs):
                     device.back()
                     break
             account_view.refresh_account()
-            (
-                session_state.my_username,
-                session_state.my_posts_count,
-                session_state.my_followers_count,
-                session_state.my_following_count,
-            ) = profile_view.getProfileInfo()
+            logger.debug("Attempting to get profile info...")
+            try:
+                (
+                    session_state.my_username,
+                    session_state.my_posts_count,
+                    session_state.my_followers_count,
+                    session_state.my_following_count,
+                ) = profile_view.getProfileInfo()
+                logger.debug(f"Profile info retrieved: username={session_state.my_username}, posts={session_state.my_posts_count}, followers={session_state.my_followers_count}, following={session_state.my_following_count}")
+            except Exception as profile_ex:
+                logger.warning(f"Error getting profile info: {profile_ex}")
+                logger.warning("Setting default values and continuing...")
+                # Set defaults if profile retrieval fails completely
+                if session_state.my_username is None:
+                    session_state.my_username = configs.args.username
+                session_state.my_posts_count = 0
+                session_state.my_followers_count = 0
+                session_state.my_following_count = 0
         except Exception as e:
-            logger.error(f"Exception: {e}")
+            logger.error(f"Critical exception: {e}")
             save_crash(device)
             break
 
@@ -275,10 +287,16 @@ def start_bot(**kwargs):
         show_ending_conditions()
         if not configs.args.debug:
             countdown(10, "Bot will start in: ")
+        else:
+            logger.debug("Debug mode enabled - skipping countdown")
+
+        logger.info("Starting job execution...")
         for plugin in jobs_list:
+            logger.debug(f"Processing plugin: {plugin}")
             inside_working_hours, time_left = SessionState.inside_working_hours(
                 configs.args.working_hours, configs.args.time_delta_session
             )
+            logger.debug(f"Working hours check: inside={inside_working_hours}, time_left={time_left}")
             if not inside_working_hours:
                 logger.info(
                     "Outside of working hours. Ending session.",
