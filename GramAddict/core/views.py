@@ -522,7 +522,14 @@ class PostsViewList:
                                 break
                     break
             if obj1 is None:
-                obj1 = gap_view_obj.get_bounds()["bottom"]
+                # INSTAGRAM V406 FIX: gap_view might not exist, use fallback
+                if gap_view_obj.exists():
+                    obj1 = gap_view_obj.get_bounds()["bottom"]
+                else:
+                    logger.debug("Gap view not found (Instagram v406), using screen-based scroll")
+                    # Fallback: use screen height for swipe calculation
+                    obj1 = displayHeight * 0.75
+
             containers_content = self.device.find(resourceIdMatches=containers_content)
 
             obj2 = (
