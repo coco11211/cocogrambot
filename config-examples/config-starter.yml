@@ -1,0 +1,153 @@
+##############################################################################
+# GramAddict Bot - Beginner Starter Configuration
+# This is a safe, minimal config for first-time users
+#
+# For more information: https://docs.gramaddict.org/#/configuration
+##############################################################################
+
+##############################################################################
+# ⚠️ REQUIRED: Change these values!
+##############################################################################
+
+username: YOUR_INSTAGRAM_USERNAME_HERE  # ⚠️ CHANGE THIS!
+
+##############################################################################
+# General Configuration (Safe defaults)
+##############################################################################
+
+app-id: com.instagram.android
+use-cloned-app: false
+allow-untested-ig-version: true  # Set to true to bypass version warnings
+screen-sleep: false  # Keep screen on for monitoring (change to true later)
+screen-record: false  # Set to true only if troubleshooting
+speed-multiplier: 1
+debug: false  # Set to true for verbose logging
+close-apps: false
+kill-atx-agent: false
+restart-atx-agent: false
+disable-block-detection: false
+disable-filters: false
+dont-type: false
+total-crashes-limit: 5
+count-app-crashes: false
+shuffle-jobs: true
+truncate-sources: 2-3
+
+##############################################################################
+# ⚠️ ACTIONS - Start with ONLY ONE action enabled
+# Uncomment (remove #) from ONE action below to start
+##############################################################################
+
+# RECOMMENDED FOR BEGINNERS: Start with your feed
+feed: 2-5  # Like 2-5 posts from your Instagram feed
+
+# OTHER ACTIONS - Keep commented until you're comfortable with feed
+# blogger-followers: [ username1, username2 ]
+# blogger-following: [ username1, username2 ]
+# blogger-post-likers: [ username1, username2 ]
+# blogger: [ username1, username2 ]
+# hashtag-likers-top: [ hashtag1, hashtag2 ]
+# hashtag-likers-recent: [ hashtag1, hashtag2 ]
+# hashtag-posts-top: [ hashtag1, hashtag2 ]
+# hashtag-posts-recent: [ hashtag1, hashtag2 ]
+# place-posts-top: [ place1, place2 ]
+# place-posts-recent: [ place1, place2 ]
+# place-likers-top: [ place1, place2 ]
+# place-likers-recent: [ place1, place2 ]
+
+##############################################################################
+# Interaction Settings (Conservative/Safe)
+##############################################################################
+
+interactions-count: 5-10  # Interact with 5-10 users per source
+likes-count: 1-2  # Like 1-2 posts per user
+likes-percentage: 100  # Always like (100%)
+stories-count: 0  # Don't watch stories initially (set to 1-2 later)
+stories-percentage: 0  # 0% initially
+carousel-count: 1  # View 1 photo in carousel posts
+carousel-percentage: 50  # View carousels 50% of the time
+watch-video-time: 10-15  # Watch videos for 10-15 seconds
+watch-photo-time: 3-5  # View photos for 3-5 seconds
+interact-percentage: 50  # Interact with 50% of posts
+follow-percentage: 0  # DON'T follow anyone initially (change to 20-30 later)
+follow-limit: 10  # Max follows per source
+skipped-list-limit: 5-10  # Skip after 5-10 already-interacted users
+skipped-posts-limit: 3  # Skip after 3 already-liked posts
+fling-when-skipped: 0  # Don't fling/scroll fast
+min-following: 100  # Stop unfollowing if you're following less than this
+
+##############################################################################
+# ⚠️ TOTAL LIMITS - Very conservative for safety
+# Increase these gradually as you gain confidence
+##############################################################################
+
+total-likes-limit: 20  # Max 20 likes per session
+total-follows-limit: 5  # Max 5 follows per session
+total-unfollows-limit: 10  # Max 10 unfollows per session
+total-watches-limit: 10  # Max 10 stories watched per session
+total-successful-interactions-limit: 15  # Max 15 successful interactions
+total-interactions-limit: 30  # Max 30 total interaction attempts
+total-comments-limit: 0  # No comments initially (add later)
+total-pm-limit: 0  # No PMs initially (add later)
+total-scraped-limit: 50  # Max usernames to scrape
+
+##############################################################################
+# Session Ending Conditions
+##############################################################################
+
+end-if-likes-limit-reached: true  # Stop when like limit reached
+end-if-follows-limit-reached: true  # Stop when follow limit reached
+end-if-watches-limit-reached: false
+end-if-comments-limit-reached: false
+end-if-pm-limit-reached: false
+
+##############################################################################
+# Scheduling (Important for safety!)
+##############################################################################
+
+# Working hours - Bot only runs during these times (24-hour format)
+# Example: [10.15-12.30, 14.00-16.30] means 10:15am-12:30pm and 2:00pm-4:30pm
+working-hours: [9.00-12.00, 14.00-17.00, 19.00-22.00]
+
+# Time delta - Random time added/subtracted from working hours (minutes)
+time-delta: 10-20
+
+# Repeat session after X minutes (comment out for single run)
+# repeat: 180-240
+
+# Total sessions before stopping (use 1 for testing, -1 for infinite)
+total-sessions: 1
+
+##############################################################################
+# Advanced Options (Leave as-is for now)
+##############################################################################
+
+# can-reinteract-after: 48  # Hours before re-interacting with same user
+# delete-interacted-users: false
+# max-comments-pro-user: 1
+# comment-percentage: 0
+# pm-percentage: 0
+
+##############################################################################
+# USAGE INSTRUCTIONS
+##############################################################################
+
+# 1. Change 'username' at the top to your Instagram username
+# 2. Save this file as: accounts/YOUR_USERNAME/config.yml
+# 3. Make sure Instagram app is in English
+# 4. Connect your Android device via USB with debugging enabled
+# 5. Run: python run.py --config "accounts/YOUR_USERNAME/config.yml"
+#
+# 6. Monitor the first few runs carefully
+# 7. Gradually increase limits if everything works smoothly
+# 8. Add more actions (hashtags, bloggers, etc.) once comfortable
+#
+# SAFETY TIPS:
+# - Start with low limits (10-20 interactions per session)
+# - Don't bot 24/7 - use working-hours
+# - Take breaks - don't run every day
+# - If you get soft-banned (can't see followers), STOP for 24-48 hours
+# - Use older Instagram versions (v263 recommended)
+#
+# For help: https://discord.gg/NK8PNEFGFF
+##############################################################################
