@@ -194,10 +194,13 @@ class Config:
                 item = item.split(":")[0]
                 if (
                     item in self.actions
-                    and getattr(self.args, item.replace("-", "_")) is not None
                     and not _is_legacy_arg(item)
                 ):
-                    self.enabled.append(item)
+                    # Check if action is defined either in parsed args or in config dict
+                    arg_attr = getattr(self.args, item.replace("-", "_"), None)
+                    config_value = self.config.get(item) if self.config else None
+                    if arg_attr is not None or config_value is not None:
+                        self.enabled.append(item)
         else:
             for item in sys.argv:
                 nitem = item[2:]
