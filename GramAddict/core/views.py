@@ -469,9 +469,20 @@ class PostsViewList:
 
         # move type: half photo
         if swipe == SwipeTo.HALF_PHOTO:
-            zoomable_view_container = self.device.find(
-                resourceIdMatches=containers_content
-            ).get_bounds()["bottom"]
+            # INSTAGRAM V406 FIX: Check if container exists before getting bounds
+            container_obj = self.device.find(resourceIdMatches=containers_content)
+            if not container_obj.exists():
+                logger.debug("Media container not found, using screen-based swipe")
+                displayHeight = self.device.get_info()["displayHeight"]
+                zoomable_view_container = displayHeight * 0.6
+            else:
+                try:
+                    zoomable_view_container = container_obj.get_bounds()["bottom"]
+                except Exception as e:
+                    logger.debug(f"Failed to get container bounds: {e}, using fallback")
+                    displayHeight = self.device.get_info()["displayHeight"]
+                    zoomable_view_container = displayHeight * 0.6
+
             ac_exists, _, ac_bottom = PostsViewList(
                 self.device
             )._get_action_bar_position()

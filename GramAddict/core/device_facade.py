@@ -322,8 +322,8 @@ class DeviceFacade:
                 logger.debug(f"Human-like pause: {pause:.2f}s")
                 sleep(pause)
             else:
-                # Fast pause for small swipes (0.3-1s)
-                DeviceFacade.sleep_mode(SleepTime.TINY)
+                # FAST pause for small swipes (0.2-0.4s)
+                sleep(uniform(0.2, 0.4))
         except uiautomator2.JSONRPCError as e:
             raise DeviceFacade.JsonRpcError(e)
 
