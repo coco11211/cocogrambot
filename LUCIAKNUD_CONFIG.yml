@@ -33,6 +33,6 @@ total-pm-limit: 0
 total-scraped-limit: 50
 end-if-likes-limit-reached: true
 end-if-follows-limit-reached: true
-working-hours: [9.00-12.00, 14.00-17.00, 19.00-22.00]
-time-delta: 10-20
+working-hours: [0.00-23.59]
+time-delta: 0
 total-sessions: 1
