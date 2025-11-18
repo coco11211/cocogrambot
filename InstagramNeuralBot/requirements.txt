@@ -1,0 +1,14 @@
+# Instagram Neural Bot Requirements
+# For Windows 11
+
+# Neural Network Framework
+torch>=2.0.0
+numpy>=1.24.0
+
+# Windows-specific
+pywin32>=305; sys_platform == 'win32'
+
+# GUI (included with Python on Windows)
+# tkinter is included with standard Python installation
+
+# No additional dependencies needed - minimal footprint!
